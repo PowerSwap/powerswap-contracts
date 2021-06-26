@@ -11,13 +11,13 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./GovernanceToken.sol";
 import "./Authorizable.sol";
 
-// MasterBreeder is the master breeder of whatever creature the GovernanceToken represents.
+// MasterSupplier is the master supplier of whatever supplier the GovernanceToken represents.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
 // will be transferred to a governance smart contract once GovernanceToken is sufficiently
 // distributed and the community can show to govern itself.
 //
-contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
+contract MasterSupplier is Ownable, Authorizable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -117,7 +117,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
     );
 
     modifier nonDuplicated(IERC20 _lpToken) {
-        require(poolExistence[_lpToken] == false, "MasterBreeder::nonDuplicated: duplicated");
+        require(poolExistence[_lpToken] == false, "MasterSupplier::nonDuplicated: duplicated");
         _;
     }
 
@@ -174,7 +174,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
     ) public onlyOwner nonDuplicated(_lpToken) {
         require(
             poolId1[address(_lpToken)] == 0,
-            "MasterBreeder::add: lp is already in pool"
+            "MasterSupplier::add: lp is already in pool"
         );
         if (_withUpdate) {
             massUpdatePools();
@@ -437,7 +437,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
         return a;
     }
 
-    // Deposit LP tokens to MasterBreeder for GovernanceToken allocation.
+    // Deposit LP tokens to MasterSupplier for GovernanceToken allocation.
     function deposit(
         uint256 _pid,
         uint256 _amount,
@@ -445,7 +445,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
     ) public nonReentrant {
         require(
             _amount > 0,
-            "MasterBreeder::deposit: amount must be greater than 0"
+            "MasterSupplier::deposit: amount must be greater than 0"
         );
 
         PoolInfo storage pool = poolInfo[_pid];
@@ -492,7 +492,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
         user.lastDepositBlock = block.number;
     }
 
-    // Withdraw LP tokens from MasterBreeder.
+    // Withdraw LP tokens from MasterSupplier.
     function withdraw(
         uint256 _pid,
         uint256 _amount,
@@ -502,7 +502,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
         UserInfo storage user = userInfo[_pid][msg.sender];
         UserGlobalInfo storage refer = userGlobalInfo[_ref];
         UserGlobalInfo storage current = userGlobalInfo[msg.sender];
-        require(user.amount >= _amount, "MasterBreeder::withdraw: not good");
+        require(user.amount >= _amount, "MasterSupplier::withdraw: not good");
         if (_ref != address(0)) {
             refer.referrals[msg.sender] = refer.referrals[msg.sender] - _amount;
             refer.globalRefAmount = refer.globalRefAmount - _amount;
@@ -650,7 +650,7 @@ contract MasterBreeder is Ownable, Authorizable, ReentrancyGuard {
         } else {
             transferSuccess = govToken.transfer(_to, _amount);
         }
-        require(transferSuccess, "MasterBreeder::safeGovTokenTransfer: transfer failed");
+        require(transferSuccess, "MasterSupplier::safeGovTokenTransfer: transfer failed");
     }
 
     // Update dev address by the previous dev.

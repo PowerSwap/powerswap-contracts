@@ -4,7 +4,7 @@ import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
 
 import { expandTo18Decimals, advanceBlockTo, humanBalance } from '../shared/utilities'
 
-import { deployMasterBreeder, deployGovernanceToken } from '../shared/deploy'
+import { deployMasterSupplier, deployGovernanceToken } from '../shared/deploy'
 
 import ERC20Mock from '../../build/ERC20Mock.json'
 
@@ -15,7 +15,7 @@ const depositAmount = expandTo18Decimals(100)
 
 chai.use(solidity)
 
-describe('MasterBreeder::Fees', () => {
+describe('MasterSupplier::Fees', () => {
   const provider = new MockProvider({
     hardfork: 'istanbul',
     mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
@@ -43,107 +43,107 @@ describe('MasterBreeder::Fees', () => {
   })
 
   it("should be able to set deposit fees to zero", async function () {
-    // 1 VIPER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
+    // 1 POWER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
     const rewardsPerBlock = 1
     const rewardsStartAtBlock = 100
-    const breeder = await deployMasterBreeder(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
-    await govToken.transferOwnership(breeder.address)
+    const supplier = await deployMasterSupplier(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
+    await govToken.transferOwnership(supplier.address)
 
-    expect(await breeder.userDepFee()).to.equal(75)
-    expect(await breeder.devDepFee()).to.equal(9925)
+    expect(await supplier.userDepFee()).to.equal(75)
+    expect(await supplier.devDepFee()).to.equal(9925)
 
-    await breeder.setUserDepFee(0)
-    await breeder.setDevDepFee(10000)
+    await supplier.setUserDepFee(0)
+    await supplier.setDevDepFee(10000)
 
-    expect(await breeder.userDepFee()).to.equal(0)
-    expect(await breeder.devDepFee()).to.equal(10000)
+    expect(await supplier.userDepFee()).to.equal(0)
+    expect(await supplier.devDepFee()).to.equal(10000)
   })
 
   it("should charge a deposit fee when deposit fees are set to default values", async function () {
-    // 1 VIPER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
+    // 1 POWER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
     const rewardsPerBlock = 1
     const rewardsStartAtBlock = 100
-    const breeder = await deployMasterBreeder(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
-    await govToken.transferOwnership(breeder.address)
+    const supplier = await deployMasterSupplier(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
+    await govToken.transferOwnership(supplier.address)
 
-    expect(await breeder.userDepFee()).to.equal(75)
-    expect(await breeder.devDepFee()).to.equal(9925)
+    expect(await supplier.userDepFee()).to.equal(75)
+    expect(await supplier.devDepFee()).to.equal(9925)
 
-    await breeder.add(rewardsPerBlock, lp.address, true)
+    await supplier.add(rewardsPerBlock, lp.address, true)
 
-    expect(await breeder.poolLength()).to.equal(1)
-    expect(await breeder.poolExistence(lp.address)).to.equal(true)
+    expect(await supplier.poolLength()).to.equal(1)
+    expect(await supplier.poolExistence(lp.address)).to.equal(true)
 
     const poolId = 0
     const depositAmount = expandTo18Decimals(100)
 
-    await lp.connect(bob).approve(breeder.address, expandTo18Decimals(1000))
-    await breeder.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
+    await lp.connect(bob).approve(supplier.address, expandTo18Decimals(1000))
+    await supplier.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
 
-    const userInfo = await breeder.userInfo(poolId, bob.address)
+    const userInfo = await supplier.userInfo(poolId, bob.address)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by ${bob.address} is: ${utils.formatEther(userInfo.amount)}`)
     expect(userInfo.amount).to.lt(depositAmount)
 
-    const devAddress = await breeder.devaddr()
+    const devAddress = await supplier.devaddr()
     if (debugMessages) console.log(`Dev address is: ${devAddress}`)
     expect(devAddress.length).to.be.greaterThan(0)
 
-    const devUserInfo = await breeder.userInfo(poolId, devAddress)
+    const devUserInfo = await supplier.userInfo(poolId, devAddress)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by dev address ${devAddress} is: ${utils.formatEther(devUserInfo.amount)}`)
     expect(devUserInfo.amount).to.gt(0)
   })
 
   it("shouldn't charge a deposit fee when deposit fees have been set to zero", async function () {
-    // 1 VIPER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
+    // 1 POWER per block farming rate starting at block 100 with the first halvening block starting 1000 blocks after the start block
     const rewardsPerBlock = 1
     const rewardsStartAtBlock = 100
-    const breeder = await deployMasterBreeder(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
-    await govToken.transferOwnership(breeder.address)
+    const supplier = await deployMasterSupplier(wallets, govToken, expandTo18Decimals(rewardsPerBlock), rewardsStartAtBlock, 1000)
+    await govToken.transferOwnership(supplier.address)
 
-    expect(await breeder.userDepFee()).to.equal(75)
-    expect(await breeder.devDepFee()).to.equal(9925)
+    expect(await supplier.userDepFee()).to.equal(75)
+    expect(await supplier.devDepFee()).to.equal(9925)
 
-    await breeder.setUserDepFee(0)
-    await breeder.setDevDepFee(10000)
+    await supplier.setUserDepFee(0)
+    await supplier.setDevDepFee(10000)
 
-    expect(await breeder.userDepFee()).to.equal(0)
-    expect(await breeder.devDepFee()).to.equal(10000)
+    expect(await supplier.userDepFee()).to.equal(0)
+    expect(await supplier.devDepFee()).to.equal(10000)
 
-    await breeder.add(rewardsPerBlock, lp.address, true)
+    await supplier.add(rewardsPerBlock, lp.address, true)
 
-    expect(await breeder.poolLength()).to.equal(1)
-    expect(await breeder.poolExistence(lp.address)).to.equal(true)
+    expect(await supplier.poolLength()).to.equal(1)
+    expect(await supplier.poolExistence(lp.address)).to.equal(true)
     const poolId = 0
 
-    await lp.connect(bob).approve(breeder.address, mintAmount)
+    await lp.connect(bob).approve(supplier.address, mintAmount)
     
-    await breeder.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
+    await supplier.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
 
-    const devAddress = await breeder.devaddr()
+    const devAddress = await supplier.devaddr()
     if (debugMessages) console.log(`Dev address is: ${devAddress}`)
     expect(devAddress.length).to.be.greaterThan(0)
 
-    let userInfo = await breeder.userInfo(poolId, bob.address)
+    let userInfo = await supplier.userInfo(poolId, bob.address)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by ${bob.address} is: ${utils.formatEther(userInfo.amount)}`)
     expect(userInfo.amount).to.eq(depositAmount)
 
-    let devUserInfo = await breeder.userInfo(poolId, devAddress)
+    let devUserInfo = await supplier.userInfo(poolId, devAddress)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by dev address ${devAddress} is: ${utils.formatEther(devUserInfo.amount)}`)
     expect(devUserInfo.amount).to.equal('0')
 
-    await breeder.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
+    await supplier.connect(bob).deposit(poolId, depositAmount, ZERO_ADDRESS)
 
-    userInfo = await breeder.userInfo(poolId, bob.address)
+    userInfo = await supplier.userInfo(poolId, bob.address)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by ${bob.address} is: ${utils.formatEther(userInfo.amount)}`)
     expect(userInfo.amount).to.eq(depositAmount.mul(2))
 
-    devUserInfo = await breeder.userInfo(poolId, devAddress)
+    devUserInfo = await supplier.userInfo(poolId, devAddress)
     if (debugMessages) console.log(`Staked amount of lp token ${lp.address} in pool ${poolId} by dev address ${devAddress} is: ${utils.formatEther(devUserInfo.amount)}`)
     expect(devUserInfo.amount).to.equal('0')
 
     // Make sure claiming rewards & exiting the pool works as expected
     await advanceBlockTo(provider, rewardsStartAtBlock+10)
-    await breeder.connect(bob).claimReward(poolId)
+    await supplier.connect(bob).claimReward(poolId)
 
     if (debugMessages) humanBalance(provider, govToken, 'balanceOf', bob.address, 'bob.address')
     const bobBalanceOf = await govToken.balanceOf(bob.address)
@@ -158,7 +158,7 @@ describe('MasterBreeder::Fees', () => {
     expect(bobTotalBalanceOf).to.gt('0')
 
     await advanceBlockTo(provider, rewardsStartAtBlock*2)
-    await breeder.connect(bob).withdraw(poolId, depositAmount.mul(2), ZERO_ADDRESS)
+    await supplier.connect(bob).withdraw(poolId, depositAmount.mul(2), ZERO_ADDRESS)
 
     // Withdrawal fees are still active - user will end up with a lesser balance of LP tokens
     const lpBalance = await lp.balanceOf(bob.address)

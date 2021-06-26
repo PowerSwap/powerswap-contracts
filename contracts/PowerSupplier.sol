@@ -3,19 +3,19 @@
 // P1 - P3: OK
 pragma solidity 0.6.12;
 
-import "@venomswap/core/contracts/interfaces/IUniswapV2Factory.sol";
-import "@venomswap/core/contracts/interfaces/IUniswapV2Pair.sol";
-import "@venomswap/core/contracts/interfaces/IUniswapV2ERC20.sol";
+import "@powerswap/core/contracts/interfaces/IUniswapV2Factory.sol";
+import "@powerswap/core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@powerswap/core/contracts/interfaces/IUniswapV2ERC20.sol";
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// PitBreeder is MasterBreeder's left hand and a prized breeder.
+// PowerSupplier is MasterSupplier's left hand and a prized supplier.
 // This contract handles "serving up" rewards for xGovernanceToken holders by trading tokens collected from fees for GovernanceToken.
 
 // T1 - T4: OK
-contract PitBreeder is Ownable {
+contract PowerSupplier is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -23,7 +23,7 @@ contract PitBreeder is Ownable {
     IUniswapV2Factory public immutable factory;
     //0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
     // V1 - V5: OK
-    address public immutable pit;
+    address public immutable grid;
     //0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272
     // V1 - V5: OK
     address private immutable govToken;
@@ -49,12 +49,12 @@ contract PitBreeder is Ownable {
 
     constructor(
         address _factory,
-        address _pit,
+        address _grid,
         address _govToken,
         address _weth
     ) public {
         factory = IUniswapV2Factory(_factory);
-        pit = _pit;
+        grid = _grid;
         govToken = _govToken;
         weth = _weth;
     }
@@ -74,7 +74,7 @@ contract PitBreeder is Ownable {
         // Checks
         require(
             token != govToken && token != weth && token != bridge,
-            "PitBreeder: Invalid bridge"
+            "GridSupplier: Invalid bridge"
         );
 
         // Effects
@@ -87,14 +87,14 @@ contract PitBreeder is Ownable {
     // C6: It's not a fool proof solution, but it prevents flash loans, so here it's ok to use tx.origin
     modifier onlyEOA() {
         // Try to make flash-loan exploit harder to do by only allowing externally owned addresses.
-        require(msg.sender == tx.origin, "PitBreeder: must use EOA");
+        require(msg.sender == tx.origin, "GridSupplier: must use EOA");
         _;
     }
 
     // F1 - F10: OK
     // F3: _convert is separate to save gas by only checking the 'onlyEOA' modifier once in case of convertMultiple
-    // F6: There is an exploit to add lots of GovernanceTokens to the pit, run convert, then remove the GovernanceTokens again.
-    //     As the size of the Pit has grown, this requires large amounts of funds and isn't super profitable anymore
+    // F6: There is an exploit to add lots of GovernanceTokens to the grid, run convert, then remove the GovernanceTokens again.
+    //     As the size of the Grid has grown, this requires large amounts of funds and isn't super profitable anymore
     //     The onlyEOA modifier prevents this being done with a flash loan.
     // C1 - C24: OK
     function convert(address token0, address token1) external onlyEOA() {
@@ -121,7 +121,7 @@ contract PitBreeder is Ownable {
         // Interactions
         // S1 - S4: OK
         IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token0, token1));
-        require(address(pair) != address(0), "PitBreeder: Invalid pair");
+        require(address(pair) != address(0), "GridSupplier: Invalid pair");
         // balanceOf: S1 - S4: OK
         // transfer: X1 - X5: OK
         IERC20(address(pair)).safeTransfer(
@@ -156,7 +156,7 @@ contract PitBreeder is Ownable {
         if (token0 == token1) {
             uint256 amount = amount0.add(amount1);
             if (token0 == govToken) {
-                IERC20(govToken).safeTransfer(pit, amount);
+                IERC20(govToken).safeTransfer(grid, amount);
                 govTokenOut = amount;
             } else if (token0 == weth) {
                 govTokenOut = _toGovToken(weth, amount);
@@ -167,11 +167,11 @@ contract PitBreeder is Ownable {
             }
         } else if (token0 == govToken) {
             // eg. GovToken - ETH
-            IERC20(govToken).safeTransfer(pit, amount0);
+            IERC20(govToken).safeTransfer(grid, amount0);
             govTokenOut = _toGovToken(token1, amount1).add(amount0);
         } else if (token1 == govToken) {
             // eg. USDT - GovToken
-            IERC20(govToken).safeTransfer(pit, amount1);
+            IERC20(govToken).safeTransfer(grid, amount1);
             govTokenOut = _toGovToken(token0, amount0).add(amount1);
         } else if (token0 == weth) {
             // eg. ETH - USDC
@@ -229,7 +229,7 @@ contract PitBreeder is Ownable {
         // X1 - X5: OK
         IUniswapV2Pair pair =
             IUniswapV2Pair(factory.getPair(fromToken, toToken));
-        require(address(pair) != address(0), "PitBreeder: Cannot convert");
+        require(address(pair) != address(0), "GridSupplier: Cannot convert");
 
         // Interactions
         // X1 - X5: OK
@@ -259,6 +259,6 @@ contract PitBreeder is Ownable {
         returns (uint256 amountOut)
     {
         // X1 - X5: OK
-        amountOut = _swap(token, govToken, amountIn, pit);
+        amountOut = _swap(token, govToken, amountIn, grid);
     }
 }

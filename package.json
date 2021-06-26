@@ -1,8 +1,8 @@
 {
-  "name": "@venomswap/contracts",
-  "version": "1.0.2",
+  "name": "@powerswap/contracts",
+  "version": "2.0.2",
   "license": "MIT",
-  "description": "Token, Liquidity Mining and Governance contracts for VenomSwap & the Venom Protocol",
+  "description": "Token, Liquidity Mining and Governance contracts for PowerSwap",
   "files": [
     "contracts",
     "build"
@@ -10,16 +10,15 @@
   "author": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VenomProtocol/venomswap-contracts.git"
+    "url": "git+https://github.com/PowerSwap/powerswap-contracts.git"
   },
   "bugs": {
-    "url": "https://github.com/VenomProtocol/venomswap-contracts/issues"
+    "url": "https://github.com/PowerSwap/powerswap-contracts/issues"
   },
-  "homepage": "https://github.com/VenomProtocol/venomswap-contracts#readme",
+  "homepage": "https://github.com/PowerSwap/powerswap-contracts#readme",
   "keywords": [
-    "venomprotocol",
-    "venomdao",
-    "venomswap",
+    "PowerSwap",
+    "power",
     "ethereum",
     "binance smart chain",
     "harmony"
@@ -40,9 +39,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.1.0",
-    "@venomswap/core": "^1.0.0",
-    "@venomswap/lib": "^1.0.0",
-    "@venomswap/periphery": "^1.0.0"
+    "@powerswap/core": "^2.0.0",
+    "@powerswap/lib": "^2.0.0",
+    "@powerswap/periphery": "^2.0.0"
   },
   "scripts": {
     "lint": "yarn prettier ./test/*.ts --check",
